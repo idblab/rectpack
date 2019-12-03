@@ -10,15 +10,16 @@ class Guillotine(PackingAlgorithm):
     For a more detailed explanation of the algorithm used, see:
     Jukka Jylanki - A Thousand Ways to Pack the Bin (February 27, 2010)
     """
-    def __init__(self, width, height, rot=True, merge=True, *args, **kwargs):
+    def __init__(self, width, height, weight, rot=True, merge=True, *args, **kwargs):
         """
         Arguments:
             width (int, float):
             height (int, float):
+            weight (int, float):
             merge (bool): Optional keyword argument
         """
         self._merge = merge
-        super(Guillotine, self).__init__(width, height, rot, *args, **kwargs)
+        super(Guillotine, self).__init__(width, height, weight, rot, *args, **kwargs)
         
 
     def _add_section(self, section):
@@ -69,11 +70,11 @@ class Guillotine(PackingAlgorithm):
         # Creates two new empty sections, and returns the new rectangle.
         if height < section.height:
             self._add_section(Rectangle(section.x, section.y+height,
-                section.width, section.height-height))
+                section.width, section.height-height, 0))
 
         if width < section.width:
             self._add_section(Rectangle(section.x+width, section.y,
-                section.width-width, height))
+                section.width-width, height, 0))
 
 
     def _split_vertical(self, section, width, height):
@@ -101,11 +102,11 @@ class Guillotine(PackingAlgorithm):
         # two, one, or no new sections will be created. 
         if height < section.height:
             self._add_section(Rectangle(section.x, section.y+height,
-                width, section.height-height))
+                width, section.height-height, 0))
         
         if width < section.width:
             self._add_section(Rectangle(section.x+width, section.y,
-                section.width-width, section.height))
+                section.width-width, section.height, 0))
         
 
     def _split(self, section, width, height):
@@ -163,20 +164,24 @@ class Guillotine(PackingAlgorithm):
         return sec, rot
 
 
-    def add_rect(self, width, height, rid=None):     
+    def add_rect(self, width, height, weight, rid=None):     
         """
         Add rectangle of widthxheight dimensions.
 
         Arguments:
             width (int, float): Rectangle width
             height (int, float): Rectangle height
+            weight (int, float): Rectangle weight
             rid: Optional rectangle user id
 
         Returns:
             Rectangle: Rectangle with placemente coordinates
             None: If the rectangle couldn be placed.
         """
-        assert(width > 0 and height >0)
+        assert(width > 0 and height > 0 and weight > 0)
+
+        if self.used_weight() + weight > self.weight:
+            return None
 
         # Obtain the best section to place the rectangle.
         section, rotated = self._select_fittest_section(width, height)
@@ -191,17 +196,20 @@ class Guillotine(PackingAlgorithm):
         self._split(section, width, height)
        
         # Store rectangle in the selected position
-        rect = Rectangle(section.x, section.y, width, height, rid)
+        rect = Rectangle(section.x, section.y, width, height, weight, rid)
         self.rectangles.append(rect)
         return rect
 
-    def fitness(self, width, height):
+    def fitness(self, width, height, weight):
         """
         In guillotine algorithm case, returns the min of the fitness of all 
         free sections, for the given dimension, both normal and rotated
         (if rotation enabled.)
         """
-        assert(width > 0 and height > 0)
+        assert(width > 0 and height > 0 and weight > 0)
+
+        if self.used_weight() + weight > self.weight:
+            return None
 
         # Get best fitness section.
         section, rotated = self._select_fittest_section(width, height)
@@ -218,7 +226,7 @@ class Guillotine(PackingAlgorithm):
     def reset(self):
         super(Guillotine, self).reset()
         self._sections = []
-        self._add_section(Rectangle(0, 0, self.width, self.height))
+        self._add_section(Rectangle(0, 0, self.width, self.height, 0))
 
 
 

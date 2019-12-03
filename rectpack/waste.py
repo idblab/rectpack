@@ -5,12 +5,12 @@ from .geometry import Rectangle
 
 class WasteManager(GuillotineBafMinas):
 
-    def __init__(self, rot=True, merge=True, *args, **kwargs):
-        super(WasteManager, self).__init__(1, 1, rot=rot, merge=merge, *args, **kwargs)
+    def __init__(self, weight, rot=True, merge=True, *args, **kwargs):
+        super(WasteManager, self).__init__(1, 1, weight, rot=rot, merge=merge, *args, **kwargs)
    
     def add_waste(self, x, y, width, height):
         """Add new waste section"""
-        self._add_section(Rectangle(x, y, width, height))
+        self._add_section(Rectangle(x, y, width, height, 0))
 
     def _fits_surface(self, width, height):
         raise NotImplementedError

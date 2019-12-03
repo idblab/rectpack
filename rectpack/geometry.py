@@ -120,22 +120,25 @@ class Rectangle(object):
     x, y-> Lower right corner coordinates
     width - 
     height - 
+    weight - 
     """
-    __slots__ = ('width', 'height', 'x', 'y', 'rid')
+    __slots__ = ('width', 'height', 'weight', 'x', 'y', 'rid')
 
-    def __init__(self, x, y, width, height, rid = None):
+    def __init__(self, x, y, width, height, weight, rid = None):
         """
         Args:
             x (int, float):
             y (int, float):
             width (int, float):
             height (int, float):
+            weight (int, float):
             rid (int):
         """
-        assert(height >=0 and width >=0)
+        assert(height >=0 and width >=0 and weight >=0)
 
         self.width = width
         self.height = height
+        self.weight = weight
         self.x = x
         self.y = y
         self.rid = rid
@@ -188,6 +191,7 @@ class Rectangle(object):
         """
         Compare rectangles by area (used for sorting)
         """
+        #TODO: weight should be considered
         return self.area() < other.area()
     
     def __eq__(self, other):
@@ -199,11 +203,12 @@ class Rectangle(object):
 
         return (self.width == other.width and \
                 self.height == other.height and \
+                self.weight == other.weight and \
                 self.x == other.x and \
                 self.y == other.y)
 
     def __hash__(self):
-        return hash((self.x, self.y, self.width, self.height))
+        return hash((self.x, self.y, self.width, self.height, self.weight))
 
     def __iter__(self):
         """
@@ -215,7 +220,7 @@ class Rectangle(object):
         yield self.corner_bot_l
 
     def __repr__(self):
-        return "R({}, {}, {}, {})".format(self.x, self.y, self.width, self.height)
+        return "R({}, {}, {}, {}, {})".format(self.x, self.y, self.width, self.height, self.weight)
 
     def area(self):
         """
@@ -308,7 +313,7 @@ class Rectangle(object):
         top = min(self.top, rect.top)
         right = min(self.right, rect.right)
 
-        return Rectangle(left, bottom, right-left, top-bottom)
+        return Rectangle(left, bottom, right-left, top-bottom, 0)
 
     def join(self, other):
         """
@@ -322,6 +327,7 @@ class Rectangle(object):
             bool: True when successfully joined, False otherwise
         """
         if self.contains(other):
+            self.weight += other.weight
             return True
 
         if other.contains(self):
@@ -329,6 +335,7 @@ class Rectangle(object):
             self.y = other.y
             self.width = other.width
             self.height = other.height
+            self.weight += other.weight
             return True
 
         if not self.intersects(other, edges=True):
@@ -340,6 +347,7 @@ class Rectangle(object):
             y_max = max(self.top, other.top)  
             self.y = y_min
             self.height = y_max-y_min
+            self.weight += other.weight
             return True
 
         # Other rectangle is Right/Left from this
@@ -348,6 +356,7 @@ class Rectangle(object):
             x_max = max(self.right, other.right)
             self.x = x_min
             self.width = x_max-x_min
+            self.weight += other.weight
             return True
 
         return False

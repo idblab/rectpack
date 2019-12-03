@@ -17,7 +17,7 @@ class Skyline(PackingAlgorithm):
     _waste: Handles all wasted sections.
     """
 
-    def __init__(self, width, height, rot=True, *args, **kwargs):
+    def __init__(self, width, height, weight, rot=True, *args, **kwargs):
         """
         _skyline is the list used to store all the skyline segments, each 
         one is a list with the format [x, y, width] where x is the x
@@ -28,11 +28,12 @@ class Skyline(PackingAlgorithm):
         Arguments:
             width (int, float): 
             height (int, float):
+            weight (int, float):
             rot (bool): Enable or disable rectangle rotation
         """
         self._waste_management = False
-        self._waste = WasteManager(rot=rot)
-        super(Skyline, self).__init__(width, height, rot, merge=False, *args, **kwargs)
+        self._waste = WasteManager(weight, rot=rot)
+        super(Skyline, self).__init__(width, height, weight, rot, merge=False, *args, **kwargs)
 
     def _placement_points_generator(self, skyline, width):
         """Returns a generator for the x coordinates of all the placement
@@ -109,7 +110,7 @@ class Skyline(PackingAlgorithm):
 
             # Add point if there is enought room at the top
             if support_height+height <= self.height:
-                points.append((Rectangle(p, support_height, width, height),\
+                points.append((Rectangle(p, support_height, width, height, 0),\
                     left_index, right_index))
 
         return points
@@ -189,10 +190,14 @@ class Skyline(PackingAlgorithm):
         return min(((p[0], self._rect_fitness(*p))for p in positions), 
                 key=operator.itemgetter(1))
 
-    def fitness(self, width, height):
+    def fitness(self, width, height, weight):
         """Search for the best fitness 
         """
-        assert(width > 0 and height >0)
+        assert(width > 0 and height > 0 and weight > 0)
+
+        if self.used_weight() + weight > self.weight:
+            return None
+
         if width > max(self.width, self.height) or\
             height > max(self.height, self.width):
             return None
@@ -207,11 +212,15 @@ class Skyline(PackingAlgorithm):
         rect, fitness = self._select_position(width, height)
         return fitness
 
-    def add_rect(self, width, height, rid=None):
+    def add_rect(self, width, height, weight, rid=None):
         """
         Add new rectangle
         """
-        assert(width > 0 and height > 0)
+        assert(width > 0 and height > 0 and weight > 0)
+
+        if self.used_weight() + weight > self.weight:
+            return None
+
         if width > max(self.width, self.height) or\
             height > max(self.height, self.width):
             return None
@@ -219,7 +228,7 @@ class Skyline(PackingAlgorithm):
         rect = None
         # If Waste managment is enabled, first try to place the rectangle there
         if self._waste_management:
-            rect = self._waste.add_rect(width, height, rid)
+            rect = self._waste.add_rect(width, height, weight, rid)
 
         # Get best possible rectangle position
         if not rect:
@@ -231,6 +240,7 @@ class Skyline(PackingAlgorithm):
             return None
         
         # Store rectangle, and recalculate skyline
+        rect.weight = weight
         rect.rid = rid
         self.rectangles.append(rect)
         return rect
