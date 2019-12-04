@@ -12,7 +12,7 @@ from .skyline import SkylineMwf, SkylineMwfl, SkylineBl, \
     SkylineBlWm, SkylineMwfWm, SkylineMwflWm
 
 from .packer import SORT_AREA, SORT_PERI, SORT_DIFF, SORT_SSIDE, \
-    SORT_LSIDE, SORT_RATIO, SORT_NONE
+    SORT_LSIDE, SORT_RATIO, SORT_WEIGHT, SORT_AREA_WEIGHT, SORT_NONE
  
 from .packer import PackerBNF, PackerBFF, PackerBBF, PackerOnlineBNF, \
     PackerOnlineBFF, PackerOnlineBBF, PackerGlobal, newPacker, \

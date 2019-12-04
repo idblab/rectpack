@@ -3,6 +3,7 @@ from .maxrects import MaxRectsBssf
 import operator
 import itertools
 import collections
+import statistics
 
 import decimal
 
@@ -25,6 +26,52 @@ def float2dec(ft, decimal_digits):
         return decimal.Decimal.from_float(float(ft)).quantize(places)
 
 
+# Round robin lists combiner
+def _round_robin(*iterables):
+    pending = len(iterables)
+    nexts = itertools.cycle(iter(it).__next__ for it in iterables)
+    while pending:
+        try:
+            for next in nexts:
+                yield next()
+        except StopIteration:
+            pending -= 1
+            nexts = itertools.cycle(itertools.islice(nexts, pending))
+
+
+# Sorting algo for considering both area and weight
+def _sort_area_weight(rectlist):
+    avg_area = statistics.mean([r[0]*r[1] for r in rectlist]) # Calc the average area
+    avg_weight = statistics.mean([r[2] for r in rectlist]) # Calc the average weight
+
+    # LALW (Large Area Large Weight)
+    lalw = sorted([r for r in rectlist if r[0] * r[1] > avg_area and r[2] < avg_weight ],
+            reverse=True,
+            key=lambda r: r[0]*r[1]) # Sort by area
+
+    # LASW (Large Area Small Weight)
+    lasw = sorted([r for r in rectlist if r[0] * r[1] < avg_area and r[2] > avg_weight ],
+            reverse=True,
+            key=lambda r: r[0]*r[1]) # Sort by area
+
+    # SALW (Small Area Large Weight)
+    salw = sorted([r for r in rectlist if r[0] * r[1] > avg_area and r[2] < avg_weight ],
+            reverse=True,
+            key=lambda r: r[2]) # Sort by weight
+
+    # Combine the SALW and LASW by round robin
+    #     SALW[0] -> LASW[0] -> SALW[1] -> LASW[1] -> ...
+    rraw = _round_robin(salw, lasw)
+
+    # SASW (Small Area Small Weight)
+    sasw = sorted([r for r in rectlist if r[0] * r[1] < avg_area and r[2] < avg_weight ],
+            reverse=True,
+            key=lambda r: r[0]*r[1]) # Sort by area
+
+    # Chain the LALW -> (LASW x SALW) -> SASW
+    return itertools.chain(lalw, rraw, sasw)
+
+
 # Sorting algos for rectangle lists
 SORT_AREA  = lambda rectlist: sorted(rectlist, reverse=True, 
         key=lambda r: r[0]*r[1]) # Sort by area
@@ -43,6 +90,11 @@ SORT_LSIDE = lambda rectlist: sorted(rectlist, reverse=True,
 
 SORT_RATIO = lambda rectlist: sorted(rectlist, reverse=True,
         key=lambda r: r[0]/r[1]) # Sort by side ratio
+
+SORT_WEIGHT  = lambda rectlist: sorted(rectlist, reverse=True, 
+        key=lambda r: r[2]) # Sort by weight
+
+SORT_AREA_WEIGHT = lambda rectlist: _sort_area_weight(rectlist) # Sort by both area and weight
 
 SORT_NONE = lambda rectlist: list(rectlist) # Unsorted
 

@@ -155,7 +155,7 @@ class MaxRects(PackingAlgorithm):
             return None
 
         # Return fitness
-        return self._rect_fitness(max_rect, rect.width, rect.height, rect.weight)
+        return self._rect_fitness(max_rect, rect.width, rect.height)
 
     def add_rect(self, width, height, weight, rid=None):
         """
