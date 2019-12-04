@@ -65,7 +65,7 @@ pack_algos = [
 ]
 
 sort_algos = [
-    ( SORT_AREA, "SORT_AREA       " ),
+    ( SORT_AREA, "SORT_AREA" ),
     ( SORT_AREA_WEIGHT, "SORT_AREA_WEIGHT" )
 ]
 
@@ -104,5 +104,5 @@ for pack_algo in pack_algos:
 
             for sort_algo in sort_algos:
                 pack = do_packing(bin_algo[0], pack_algo[0], sort_algo[0])
-                print("{}\t{}\t{}\t{}\t{}".format(pack_algo[1], bin_algo[1], data_set[1], sort_algo[1], len(pack.bin_list())))
+                print("{},{},{},{},{}".format(pack_algo[1], bin_algo[1], data_set[1], sort_algo[1], len(pack.bin_list())))
 
