@@ -45,26 +45,26 @@ def _sort_area_weight(rectlist):
     avg_weight = statistics.mean([r[2] for r in rectlist]) # Calc the average weight
 
     # LALW (Large Area Large Weight)
-    lalw = sorted([r for r in rectlist if r[0] * r[1] >= avg_area and r[2] >= avg_weight ],
+    lalw = sorted([r for r in rectlist if r[0] * r[1] > avg_area and r[2] > avg_weight ],
             reverse=True,
             key=lambda r: r[0]*r[1]) # Sort by area
 
     # LASW (Large Area Small Weight)
-    lasw = sorted([r for r in rectlist if r[0] * r[1] < avg_area and r[2] > avg_weight ],
+    lasw = sorted([r for r in rectlist if r[0] * r[1] <= avg_area and r[2] >= avg_weight ],
             reverse=True,
             key=lambda r: r[0]*r[1]) # Sort by area
 
     # SALW (Small Area Large Weight)
-    salw = sorted([r for r in rectlist if r[0] * r[1] > avg_area and r[2] < avg_weight ],
+    salw = sorted([r for r in rectlist if r[0] * r[1] >= avg_area and r[2] <= avg_weight ],
             reverse=True,
             key=lambda r: r[2]) # Sort by weight
 
-    # Combine the SALW and LASW by round robin
-    #     SALW[0] -> LASW[0] -> SALW[1] -> LASW[1] -> ...
-    rraw = _round_robin(salw, lasw)
+    # Combine the LASW and SALW by round robin
+    #     LASW[0] -> SALW[0] -> LASW[1] -> SALW[1] -> ...
+    rraw = _round_robin(lasw, salw)
 
     # SASW (Small Area Small Weight)
-    sasw = sorted([r for r in rectlist if r[0] * r[1] <= avg_area and r[2] <= avg_weight ],
+    sasw = sorted([r for r in rectlist if r[0] * r[1] < avg_area and r[2] < avg_weight ],
             reverse=True,
             key=lambda r: r[0]*r[1]) # Sort by area
 
