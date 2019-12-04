@@ -45,7 +45,7 @@ def _sort_area_weight(rectlist):
     avg_weight = statistics.mean([r[2] for r in rectlist]) # Calc the average weight
 
     # LALW (Large Area Large Weight)
-    lalw = sorted([r for r in rectlist if r[0] * r[1] > avg_area and r[2] < avg_weight ],
+    lalw = sorted([r for r in rectlist if r[0] * r[1] >= avg_area and r[2] >= avg_weight ],
             reverse=True,
             key=lambda r: r[0]*r[1]) # Sort by area
 
@@ -64,7 +64,7 @@ def _sort_area_weight(rectlist):
     rraw = _round_robin(salw, lasw)
 
     # SASW (Small Area Small Weight)
-    sasw = sorted([r for r in rectlist if r[0] * r[1] < avg_area and r[2] < avg_weight ],
+    sasw = sorted([r for r in rectlist if r[0] * r[1] <= avg_area and r[2] <= avg_weight ],
             reverse=True,
             key=lambda r: r[0]*r[1]) # Sort by area
 

@@ -204,7 +204,7 @@ class Skyline(PackingAlgorithm):
 
         # If there is room in wasted space, FREE PACKING!!
         if self._waste_management:
-            if self._waste.fitness(width, height) is not None:
+            if self._waste.fitness(width, height, weight) is not None:
                 return 0
 
         # Get best fitness segment, for normal rectangle, and for
