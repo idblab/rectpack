@@ -12,9 +12,9 @@ bins = [(b, 12, 4, 20) for b in range(1, 101)]
 
 # Create the packer instance
 packer = newPacker(
-    pack_algo=MaxRectsBssf,
-    bin_algo=PackingBin.BFF,
-    sort_algo=SORT_AREA,
+    pack_algo=MaxRectsBaf,
+    bin_algo=PackingBin.BBF,
+    sort_algo=SORT_AREA_WEIGHT,
     rotation=1
 )
 
